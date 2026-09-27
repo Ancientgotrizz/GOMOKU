@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGame } from '../hooks/useGame';
 import { useTheme } from '../hooks/useTheme';
@@ -51,6 +51,42 @@ export default function Game() {
   const [joinBusy, setJoinBusy] = useState(false);
   const [joinError, setJoinError] = useState(null);
   const [copied, copyLink] = useCopyLink(roomId);
+  const [gameNotice, setGameNotice] = useState('');
+  const [welcomeName, setWelcomeName] = useState('');
+  const previousRoom = useRef(null);
+
+  useEffect(() => {
+    if (!room) return;
+
+    const previous = previousRoom.current;
+    if (previous) {
+      if (!previous.player2Id && room.player2.id) {
+        if (mySymbol === 'B') setGameNotice(`${room.player2.name} joined. Game on!`);
+      }
+
+      if (previous.status === 'playing' && room.status === 'finished') {
+        const winnerName = room.winner === 'B' ? room.player1.name : room.winner === 'W' ? room.player2.name : null;
+        setGameNotice(room.winner === 'draw' ? "A close game! It's a draw." : `${winnerName} wins! Great game!`);
+      }
+    }
+
+    previousRoom.current = { player2Id: room.player2.id, status: room.status };
+  }, [room, mySymbol]);
+
+  useEffect(() => {
+    if (!gameNotice) return undefined;
+    const timeout = setTimeout(() => setGameNotice(''), 3600);
+    return () => clearTimeout(timeout);
+  }, [gameNotice]);
+
+  useEffect(() => {
+    if (!welcomeName) return undefined;
+    function handleKeyDown(event) {
+      if (event.key === 'Escape') setWelcomeName('');
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [welcomeName]);
 
   useEffect(() => {
     if (!actionError) return undefined;
@@ -66,6 +102,7 @@ export default function Game() {
     setJoinError(null);
     try {
       await join(trimmed);
+      setWelcomeName(trimmed);
     } catch (err) {
       if (err.message?.includes('ROOM_FULL')) {
         setJoinError('This game just filled up.');
@@ -230,7 +267,24 @@ export default function Game() {
         </div>
       </div>
 
-      <Toast message={actionError} />
+      <Toast message={actionError || gameNotice} />
+      {welcomeName && (
+        <div
+          className="welcome-overlay"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setWelcomeName('');
+          }}
+        >
+          <section className="welcome-modal" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
+            <div className="welcome-modal__mark" aria-hidden="true">G</div>
+            <h2 id="welcome-title">WELCOME!</h2>
+            <p>Welcome to the game MISS ,kil. Happy playing!</p>
+            <button type="button" className="btn btn--primary" autoFocus onClick={() => setWelcomeName('')}>
+              Let’s play
+            </button>
+          </section>
+        </div>
+      )}
     </div>
   );
 }

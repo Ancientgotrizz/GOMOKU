@@ -607,6 +607,7 @@ body {
   display: flex;
   justify-content: center;
   width: 100%;
+  position: relative;
 }
 
 .board {
@@ -635,6 +636,7 @@ body {
   justify-content: center;
   cursor: pointer;
   position: relative;
+  transition: background-color 140ms ease, transform 140ms ease;
 }
 
 .cell:nth-child(15n) {
@@ -654,7 +656,20 @@ body {
   position: absolute;
   inset: 12%;
   border-radius: 50%;
-  background: var(--surface-border);
+  background: color-mix(in srgb, var(--accent) 24%, transparent);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 35%, transparent);
+  transform: scale(1.08);
+}
+
+.cell:not(.cell--filled):not(:disabled):active {
+  transform: scale(0.9);
+}
+
+.cell:focus-visible {
+  z-index: 1;
+  outline: 2px solid var(--accent);
+  outline-offset: -3px;
+  border-radius: 50%;
 }
 
 .stone {
@@ -698,6 +713,34 @@ body {
   50% { filter: brightness(1.25); }
 }
 
+.win-confetti {
+  position: absolute;
+  inset: -12px 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.win-confetti span {
+  position: absolute;
+  top: -14px;
+  left: var(--confetti-left);
+  width: 7px;
+  height: 11px;
+  border-radius: 2px;
+  background: var(--confetti-color);
+  opacity: 0;
+  animation: confetti-fall 2.3s ease-out var(--confetti-delay) both;
+}
+
+@keyframes confetti-fall {
+  8% { opacity: 1; }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--confetti-drift), var(--confetti-fall), 0) rotate(var(--confetti-rotation));
+  }
+}
+
 /* ---------------------------------------------------------------------- */
 /* Toast                                                                    */
 /* ---------------------------------------------------------------------- */
@@ -716,6 +759,91 @@ body {
   box-shadow: var(--shadow-glow);
   z-index: 30;
   backdrop-filter: blur(12px);
+  animation: toast-arrive 240ms cubic-bezier(0.2, 0.8, 0.3, 1.2) both;
+}
+
+.welcome-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  background: rgba(4, 7, 13, 0.72);
+  backdrop-filter: blur(8px);
+  animation: welcome-backdrop 220ms ease-out both;
+}
+
+.welcome-modal {
+  width: min(100%, 520px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 3rem 2rem 2.5rem;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-1);
+  color: var(--text-primary);
+  text-align: center;
+  box-shadow: var(--shadow-glow), 0 24px 80px rgba(0, 0, 0, 0.38);
+  animation: welcome-pop 360ms cubic-bezier(0.2, 0.8, 0.3, 1.15) both;
+}
+
+.welcome-modal__mark {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border: 1px solid var(--surface-border);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 18%, var(--surface));
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.welcome-modal h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.welcome-modal p {
+  max-width: 34ch;
+  margin: 0 0 0.5rem;
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+@keyframes welcome-backdrop {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes welcome-pop {
+  from { opacity: 0; transform: translateY(14px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes toast-arrive {
+  from { opacity: 0; transform: translate(-50%, 10px) scale(0.96); }
+  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cell,
+  .cell .stone,
+  .cell--winning .stone,
+  .win-confetti span,
+  .toast {
+    animation: none;
+    transition: none;
+  }
 }
 
 /* ---------------------------------------------------------------------- */
@@ -746,6 +874,17 @@ body {
 
   .home-title {
     letter-spacing: 0.05em;
+  }
+}
+
+@media (max-width: 480px) and (max-height: 700px) {
+  .page--game {
+    gap: 0.45rem;
+    padding-top: 0.4rem;
+  }
+
+  .page--game .topbar {
+    margin-bottom: 0;
   }
 }
 

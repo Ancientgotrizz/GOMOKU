@@ -8,6 +8,24 @@ export default function Board({ board, onCellClick, disabled, lastMove, winningL
     return new Set(winningLine.map(([r, c]) => `${r}-${c}`));
   }, [winningLine]);
 
+  const confetti = useMemo(
+    () =>
+      Array.from({ length: 24 }, (_, index) => (
+        <span
+          key={index}
+          style={{
+            '--confetti-left': `${(index * 47) % 100}%`,
+            '--confetti-delay': `${(index % 6) * 0.045}s`,
+            '--confetti-drift': `${((index * 23) % 120) - 60}px`,
+            '--confetti-fall': `${180 + ((index * 31) % 160)}px`,
+            '--confetti-rotation': `${((index * 113) % 720) - 360}deg`,
+            '--confetti-color': ['var(--accent)', 'var(--accent-2)', 'var(--win)', 'var(--danger)'][index % 4],
+          }}
+        />
+      )),
+    []
+  );
+
   return (
     <div className="board-wrap">
       <div
@@ -31,6 +49,7 @@ export default function Board({ board, onCellClick, disabled, lastMove, winningL
           ))
         )}
       </div>
+      {winningLine?.length > 0 && <div className="win-confetti" aria-hidden="true">{confetti}</div>}
     </div>
   );
 }
