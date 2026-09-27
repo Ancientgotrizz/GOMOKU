@@ -65,6 +65,7 @@ export default function Home() {
 
       <div className="home-hero">
         <h1 className="home-title">GOMOKU</h1>
+        <p className="home-credit">Created by Ancient Productions on 17th of September 2026</p>
         <p className="home-tagline">Two players. One board.</p>
 
         {view === 'landing' && (

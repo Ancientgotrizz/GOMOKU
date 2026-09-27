@@ -157,6 +157,14 @@ body {
   color: transparent;
 }
 
+.home-credit {
+  margin: 0.1rem 0 0.25rem;
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  line-height: 1.4;
+  text-align: center;
+}
+
 .home-tagline {
   color: var(--text-secondary);
   font-size: 1.05rem;
